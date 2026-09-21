@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Association Election 2026</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#f4f6f8;color:#222}
+header{background:#111827;color:white;text-align:center;padding:25px}
+main{max-width:650px;margin:20px auto;padding:15px}
+.card{background:white;padding:18px;margin:15px 0;border-radius:15px;box-shadow:0 3px 10px #ddd}
+.candidate{display:flex;align-items:center;gap:12px;padding:12px;margin:8px 0;border:2px solid #eee;border-radius:10px;cursor:pointer}
+.candidate.selected{border-color:#111827;background:#f9fafb}
+.color{width:30px;height:30px;border-radius:7px;border:1px solid #ccc}
+.name{flex:1;font-weight:bold}
+button{width:100%;padding:15px;border:0;border-radius:10px;background:#111827;color:white;font-weight:bold;font-size:16px;cursor:pointer}
+button:disabled{background:#999}
+#success{display:none;background:#dcfce7;color:#166534;padding:15px;border-radius:10px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Association Election 2026</h1>
+  <p>Choose your representatives</p>
+</header>
+
+<main>
+  <div class="card">
+    <b>Voting Instructions</b>
+    <p>Select one candidate for each position.</p>
+  </div>
+
+  <div id="success">Vote submitted successfully!</div>
+
+  <form id="voteForm"></form>
+</main>
+
+<script>
+var positions = [
+  {title: "President", list: [["President 1", "#22c55e"], ["President 2", "#111827"]]},
+  {title: "Secretary", list: [["Secretary 1", "#ffffff"], ["Secretary 2", "#ef4444"]]},
+  {title: "Account Commissioner", list: [["Account Commissioner", "#facc15"]]},
+  {title: "Censor", list: [["Censor 1", "#ec4899"]]}
+];
+
+var form = document.getElementById("voteForm");
+
+function refreshHighlight(groupName) {
+  var radios = document.getElementsByName(groupName);
+  for (var k = 0; k < radios.length; k++) {
+    if (radios[k].checked) {
+      radios[k].parentNode.className = "candidate selected";
+    } else {
+      radios[k].parentNode.className = "candidate";
+    }
+  }
+}
+
+function buildPosition(index) {
+  var item = positions[index];
+  var groupName = "pos" + index;
+
+  var card = document.createElement("div");
+  card.className = "card";
+
+  var h = document.createElement("h2");
+  h.textContent = item.title;
+  card.appendChild(h);
+
+  for (var j = 0; j < item.list.length; j++) {
+    var label = document.createElement("label");
+    label.className = "candidate";
+
+    var swatch = document.createElement("span");
+    swatch.className = "color";
+    swatch.style.background = item.list[j][1];
+
+    var nameEl = document.createElement("span");
+    nameEl.className = "name";
+    nameEl.textContent = item.list[j][0];
+
+    var radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = groupName;
+    radio.value = item.list[j][0];
+    radio.onchange = function () {
+      refreshHighlight(this.name);
+    };
+
+    label.appendChild(swatch);
+    label.appendChild(nameEl);
+    label.appendChild(radio);
+    card.appendChild(label);
+  }
+
+  form.appendChild(card);
+}
+
+for (var i = 0; i < positions.length; i++) {
+  buildPosition(i);
+}
+
+var submitBtn = document.createElement("button");
+submitBtn.type = "submit";
+submitBtn.textContent = "Submit My Vote";
+form.appendChild(submitBtn);
+
+function allSelected() {
+  for (var p = 0; p < positions.length; p++) {
+    var radios = document.getElementsByName("pos" + p);
+    var found = false;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        found = true;
+      }
+    }
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
+}
+
+form.onsubmit = function (e) {
+  e.preventDefault();
+
+  if (!allSelected()) {
+    alert("Please select a candidate for every position.");
+    return false;
+  }
+
+  if (!confirm("Are you sure? You cannot change your vote afterwards.")) {
+    return false;
+  }
+
+  document.getElementById("success").style.display = "block";
+
+  var inputs = form.getElementsByTagName("input");
+  for (var n = 0; n < inputs.length; n++) {
+    inputs[n].disabled = true;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Vote Submitted";
+  return false;
+};
+</script>
+
+</body>
+</html>
